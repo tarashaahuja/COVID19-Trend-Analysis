@@ -1,0 +1,55 @@
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from sklearn.impute import SimpleImputer
+
+df=pd.read_csv('/Users/TT/Desktop/archive/worldometer_data.csv')
+
+df.head(50)
+
+df=df.drop(['Population'],axis=1)
+
+df.head()
+
+df.rename(columns={'Country/Region':'country'})
+
+df=df.drop(['Tot Cases/1M pop'],axis=1)
+df=df.drop(['Deaths/1M pop'],axis=1)
+df=df.drop(['Tests/1M pop'],axis=1)
+
+df.head()
+
+df=df.rename(columns={'Country/Region':'Country'})
+df.head()
+
+imputer=SimpleImputer(strategy='constant')
+df1=pd.DataFrame(imputer.fit_transform(df),columns=df.columns)
+
+df2=df1.groupby(['Country'])[['TotalCases','TotalDeaths','TotalRecovered']].sum().reset_index()
+df2.head()
+
+countries=df2['Country'].unique()
+len(countries)
+
+for idx in range(0,len(countries)):
+    c=df2[df2['Country']==countries[idx]].reset_index()
+    plt.scatter(np.arange(0,len(c)),c['TotalCases'],color='blue',label='Total Cases')
+    plt.scatter(np.arange(0,len(c)),c['TotalDeaths'],color='red',label='Total Deaths')
+    plt.scatter(np.arange(0,len(c)),c['TotalRecovered'],color='green',label='Total Recovered')
+    plt.title(countries[idx])
+    plt.xlabel('Days since the first suspect')
+    plt.ylabel('Number of cases')
+    plt.legend()
+    plt.show()
+
+df3=df2.groupby(['Date'])[['Date','TotalCases','TotalDeaths','TotalRecovered']].sum().reset_index()
+
+c=df3
+plt.scatter(np.arange(0,len(c)),c['TotalCases'],color='blue',label='Total Cases')
+plt.scatter(np.arange(0,len(c)),c['TotalDeaths'],color='red',label='Total Deaths')
+plt.scatter(np.arange(0,len(c)),c['TotalRecovered'],color='green',label='Total Recovered')
+plt.title('World')
+plt.xlabel('Days since the first suspect')
+plt.ylabel('Number of cases')
+plt.legend()
+plt.show()
